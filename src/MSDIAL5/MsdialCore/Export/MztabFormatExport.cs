@@ -1,10 +1,14 @@
-﻿using CompMs.Common.DataObj.Result;
+using CompMs.Common.DataObj.Result;
 using CompMs.Common.Enum;
 using CompMs.MsdialCore.DataObj;
 using CompMs.MsdialCore.MSDec;
 using CompMs.MsdialCore.Parameter;
+using NCDK;
+using NCDK.Graphs.InChI;
+using NCDK.Smiles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -198,7 +202,6 @@ namespace CompMs.MsdialCore.Export
         {
             var matchResult = spot.MatchResults.Representative;
 
-            var inchi = "null";
             var smlID = metadata["Alignment ID"];
             var smfIDrefs = metadata["Alignment ID"];
             var chemicalName = metadata["Metabolite name"];
@@ -206,6 +209,34 @@ namespace CompMs.MsdialCore.Export
             var databaseIdentifier = "null";
             var LibraryID = spot?.MatchResults?.Representative.LibraryID;
             var rep = spot?.MatchResults?.Representative;
+            var smiles = metadata["SMILES"];
+            
+            // Updated: Convert SMILES to InChI if TargetOmics is Metabolomics; otherwise, "null"
+            var inchi = "null";
+            if (meta.TargetOmics == TargetOmics.Metabolomics && !string.IsNullOrEmpty(smiles) && smiles != "null")
+            {
+                Debug.WriteLine("aaaaaaaaaaaaaaaaaaaaaaaaa");
+                try
+                {
+                    var sp = new SmilesParser(NCDK.Silent.ChemObjectBuilder.Instance);
+                    Debug.WriteLine("bbbbbbbbbbbbbbbbbbbbb");
+                    Debug.WriteLine(smiles);
+                    IAtomContainer mol = sp.ParseSmiles(smiles);
+
+                    var factory = InChIGeneratorFactory.Instance;
+                    var gen = factory.GetInChIGenerator(mol);
+
+                    inchi = gen.InChI;
+
+                    Debug.WriteLine(inchi);
+                }
+                catch
+                {
+                    // Conversion failed or invalid SMILES; default to "null"
+                    inchi = "null";
+                }
+            }
+            
             if (rep != null &&
                 rep.AnnotatorID != null &&
                 _annotatorID2DataBaseID.TryGetValue(rep.AnnotatorID, out var databaseID) &&
@@ -215,7 +246,6 @@ namespace CompMs.MsdialCore.Export
             }
 
             var chemicalFormula = metadata["Formula"];
-            var smiles = metadata["SMILES"];
 
             var uri = "null";
 
@@ -381,7 +411,6 @@ namespace CompMs.MsdialCore.Export
             var smePrefix = "SME";
             var smeID = metadata["Alignment ID"];
             var evidenceInputID = metadata["Alignment ID"]; ; // need to consider
-            var inchi = "null";
             var uri = "null";
             var adductIons = SetAdductTypeString(metadata["Adduct type"]?.ToString() ?? "null");
 
@@ -408,6 +437,28 @@ namespace CompMs.MsdialCore.Export
             var chemicalFormula = metadata["Formula"];
             var smiles = metadata["SMILES"];
             var theoreticalMassToCharge = metadata.TryGetValue("Reference m/z", out var refmz) ? refmz : "0";
+            
+            // Updated: Convert SMILES to InChI if TargetOmics is Metabolomics; otherwise, "null"
+            var inchi = "null";
+            if (param.TargetOmics == TargetOmics.Metabolomics && !string.IsNullOrEmpty(smiles))
+            {
+                try
+                {
+                    var sp = new SmilesParser(NCDK.Silent.ChemObjectBuilder.Instance);
+                    IAtomContainer mol = sp.ParseSmiles(smiles);
+
+                    var factory = InChIGeneratorFactory.Instance;
+                    var gen = factory.GetInChIGenerator(mol);
+
+                    inchi = gen.InChI;
+                }
+                catch
+                {
+                    // Conversion failed or invalid SMILES; default to "null"
+                    inchi = "null";
+                }
+            }
+            
             var spectraRefList = new List<string>();  //  multiple files
             for (int i = 0; i < properties.Count; i++)
             {
