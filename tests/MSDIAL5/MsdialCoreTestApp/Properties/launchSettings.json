@@ -1,7 +1,9 @@
 {
   "profiles": {
     "MsdialCoreTestApp": {
-      "commandName": "Project"
+      "commandName": "Project",
+      "commandLineArgs": "lcms -i wine/consoleapp_demo_csvimportfiles.csv -o out -m wine_method.txt -p",
+      "workingDirectory": "C:\\Users\\knishida"
     }
   }
 }
