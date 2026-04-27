@@ -1,68 +1,63 @@
-# MsdialWorkbench contents
+# MS-DIAL 5 Console Build Check
 
-## MS-DIAL - software for untargeted metabolomics and lipidomics
-The program supports data processings for any type of chromatography / scan type mass spectrometry data, and the assembly is licensed under the CC-BY 4.0.
+This subtree contains the MS-DIAL 5 console/backend projects after removing the WPF GUI projects.
 
-## MS-FINDER - software for structure elucidation of unknown spectra with hydrogen rearrangement (HR) rules
-The program supports molecular formula prediction, metabolie class prediction, and structure elucidation for EI-MS and MS/MS spectra, and the assembly is licensed under the CC-BY 4.0.
+## RawDataHandler package source
 
-## From e-mail to GitHub (for open science)
-If you would like to discuss with us (for feedback, bug reports, and questions),
-we would appreciate it if you could do it on
-https://github.com/systemsomicslab/MsdialWorkbench/issues
-or
-https://github.com/systemsomicslab/MsdialWorkbench/discussions
-(instead of e-mail).
+The console build uses the vendor-unsupported RawDataHandler package:
 
-However, if the discussion is something that cannot be done openly by any means, please email msdial-jp-groups@go.tuat.ac.jp.
+`RawDataHandler-Vendor-UnSupported.1.2.9082.378.nupkg`
 
-# How to build MS-DIAL5 Desktop Application (for Windows)
+The package is expected in the repository-level `Assemblies` directory. `NuGet.Config` in this folder adds that local package source and `nuget.org`:
 
-## Installing Visual Studio and cloning MsdialWorkbench source code
-1. Download and install [Visual Studio Community 2022](https://visualstudio.microsoft.com/). (In the `Workloads` selection, choose `.NET desktop development`. )
-2. Git clone this repo with `git clone https://github.com/mtbinfo-team/MsdialWorkbench`.
+```xml
+<packageSources>
+  <clear />
+  <add key="MS-DIAL Assemblies" value="..\..\Assemblies" />
+  <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
+</packageSources>
+```
 
-## Building MsdialWorkbench with Visual Studio
-3. Double click `MsdialWorkbench.sln` in the cloned repo.
-4. Right-click on `MsdialWorkbench` in the Solution Explorer.
-5. Click `Manage NuGet Packages for Solution...`.
-6. Add the `Assemblies` folder in this repo to the **Package source:**.
-7. Select `Debug vendor unsupported` from the `Solution Configurations` pull-down menu.
-8. Select `MsdialGuiApp` from the `Startup Projects` pull-down menu.
-9. Click `▶ MsdialGuiApp` button on the right side of 8.
+## Ubuntu Linux publish check
 
-### Important Note
-The 'Debug/Release vendor unsupported' version is a special configuration designed for the purpose of source code distribution.
-Due to licensing restrictions, this version cannot read proprietary data formats from mass spectrometry manufacturers.
-However, the [release versions](https://github.com/systemsomicslab/MsdialWorkbench/releases) distributed with official releases can read these proprietary formats.
-For the 'Debug/Release vendor unsupported' version, only the following formats are supported: **abf**(Reifycs), **cdf**(NetCDF), and **mzml**.
-If you convert your data into one of these formats, you can still analyze it using this configuration.
-Other than the data reading capability, there are no differences between this configuration and the release versions.
+Run the Ubuntu Linux publish check from `src/MSDIAL5`:
 
-# Developers
-Lead developer: Hiroshi Tsugawa (TUAT/RIKEN) 
+```powershell
+$env:DOTNET_CLI_HOME = (Resolve-Path .).Path
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
-Current main developers: Hiroshi Tsugawa (TUAT/RIKEN), Mikiko Takahashi (RIKEN), Yuki Matsuzawa (TUAT) and Bujinlkham Buyantogtokh (TUAT)
+dotnet publish ..\..\tests\MSDIAL5\MsdialCoreTestApp\MsdialCoreTestApp.csproj `
+  --configuration "Debug vendor unsupported" `
+  --framework net8 `
+  --runtime linux-x64 `
+  --self-contained false `
+  -p:RestoreConfigFile=NuGet.Config
+```
 
-Past developers: Diego Pedrosa (UC Davis), Ipputa Tada (SOKENDAI)
+The verified publish completed with `0 Error(s)` and produced the Ubuntu/Linux x64 output at:
 
-# Usage
-See the tutorial page: https://systemsomicslab.github.io/mtbinfo.github.io/
+`tests\MSDIAL5\MsdialCoreTestApp\bin\Debug vendor unsupported\net8\linux-x64\publish\`
 
-# About LBM file in MS-DIAL project
-The LBM (*.LBM2) file contains the in silico MS/MS spectra of lipids.
-There are currently three files named with 'FiehnO (Oliver Fiehn laboratory)', 'AritaM (Makoto Arita laboratory)', and 'SaitoK (Kazuki Saito laboratory)'.
-These files contain the same MS/MS spectra information but have different predicted retention times which were optimized for the indivisual method.
-One of the '.LBM' files which contains lipid's in silico MS/MS should be also in the same folder as 'MSDIAL.exe' for Lipidomics project. 
+## macOS arm64 publish check
 
-# Further
-MRMPROBS software suite is sutable for targeted metabolomics and lipidomics, and it also supports MRM/SRM data.
-http://prime.psc.riken.jp/compms/mrmprobs/main.html
+Run the macOS arm64 publish check from `src/MSDIAL5`:
 
+```powershell
+$env:DOTNET_CLI_HOME = (Resolve-Path .).Path
+$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
+$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 
-# Source code license
-The source code is licensed under GNU LESSER GENERAL PUBLIC LICENSE (LGPL) version 3.
-See LGPL.txt for full text of the license.
-This software uses third-party software.
-A full list of third-party software licenses in MsdialWorkbench is in the file THIRD-PARTY-LICENSE-README.txt.
+dotnet publish ..\..\tests\MSDIAL5\MsdialCoreTestApp\MsdialCoreTestApp.csproj `
+  --configuration "Debug vendor unsupported" `
+  --framework net8 `
+  --runtime osx-arm64 `
+  --self-contained false `
+  -p:RestoreConfigFile=NuGet.Config
+```
 
+The verified publish completed with `0 Error(s)` and produced the macOS arm64 output at:
+
+`tests\MSDIAL5\MsdialCoreTestApp\bin\Debug vendor unsupported\net8\osx-arm64\publish\`
+
+Warnings are currently expected, including `MessagePack` vulnerability warnings, `zlib.net` compatibility warnings, nullable reference warnings, and obsolete API warnings.
