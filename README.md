@@ -1,6 +1,7 @@
-# MS-DIAL 5 Console Build Check
+# MSDIAL 5 headless (command-line) version.
 
-This subtree contains the MS-DIAL 5 console/backend projects after removing the WPF GUI projects.
+This repository contains only the MSDIAL 5 console/backend projects after the WPF GUI projects have been removed.
+Projects such as MSDIAL 4 and MSFINDER have also been removed from this repository.
 
 ## RawDataHandler package source
 
