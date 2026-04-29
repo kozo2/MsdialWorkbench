@@ -14,25 +14,25 @@ The package is expected in the repository-level `Assemblies` directory. `NuGet.C
 ```xml
 <packageSources>
   <clear />
-  <add key="MS-DIAL Assemblies" value="..\..\Assemblies" />
+  <add key="MS-DIAL Assemblies" value="Assemblies" />
   <add key="nuget.org" value="https://api.nuget.org/v3/index.json" />
 </packageSources>
 ```
 
-## Ubuntu Linux publish check
+## Installing .NET required for build or execution
 
-Run the Ubuntu Linux publish check from `src/MSDIAL5`:
+[Install .NET SDK or .NET Runtime on Ubuntu or macOS](https://dotnet.microsoft.com/download/dotnet/8.0)
 
-```powershell
-$env:DOTNET_CLI_HOME = (Resolve-Path .).Path
-$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
-$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
+## Ubuntu Linux build check
 
-dotnet publish ..\..\tests\MSDIAL5\MsdialCoreTestApp\MsdialCoreTestApp.csproj `
-  --configuration "Debug vendor unsupported" `
-  --framework net8 `
-  --runtime linux-x64 `
-  --self-contained false `
+Run the following command from the root directory of this repository.
+
+```bash
+dotnet publish tests/MSDIAL5/MsdialCoreTestApp/MsdialCoreTestApp.csproj \
+  --configuration "Debug vendor unsupported" \
+  --framework net8 \
+  --runtime linux-x64 \
+  --self-contained false \
   -p:RestoreConfigFile=NuGet.Config
 ```
 
@@ -40,20 +40,16 @@ The verified publish completed with `0 Error(s)` and produced the Ubuntu/Linux x
 
 `tests\MSDIAL5\MsdialCoreTestApp\bin\Debug vendor unsupported\net8\linux-x64\publish\`
 
-## macOS arm64 publish check
+## macOS arm64 build check
 
-Run the macOS arm64 publish check from `src/MSDIAL5`:
+Run the following command from the root directory of this repository.
 
-```powershell
-$env:DOTNET_CLI_HOME = (Resolve-Path .).Path
-$env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = '1'
-$env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
-
-dotnet publish ..\..\tests\MSDIAL5\MsdialCoreTestApp\MsdialCoreTestApp.csproj `
-  --configuration "Debug vendor unsupported" `
-  --framework net8 `
-  --runtime osx-arm64 `
-  --self-contained false `
+```bash
+dotnet publish tests/MSDIAL5/MsdialCoreTestApp/MsdialCoreTestApp.csproj \
+  --configuration "Debug vendor unsupported" \
+  --framework net8 \
+  --runtime osx-arm64 \
+  --self-contained false \
   -p:RestoreConfigFile=NuGet.Config
 ```
 
